@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.homedns.mkh.util;
+package org.homedns.mkh.util.io;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,32 +25,17 @@ import java.nio.file.Path;
  *
  */
 public class TextReader {
-	private Path path;
 	
 	/**
-	 * @param path the path to target file
-	 */
-	public TextReader( Path path ) {
-		setPath( path );
-	}
-	
-	/**
-	 * Sets path to file
+	 * Reads content from specified file
 	 * 
-	 * @param path the path to file to set
-	 */
-	public void setPath( Path path ) {
-		this.path = path;
-	}
-	
-	/**
-	 * Reads file content
+	 * @param path the file path
 	 * 
 	 * @return the string
 	 * 
 	 * @throws Exception
 	 */
-	public String read( ) throws Exception {
+	public static String read( Path path ) throws Exception {
 		StringBuffer sb = new StringBuffer( );
 		try( BufferedReader in = new BufferedReader( new FileReader( path.toFile( ) ) ) ) {
 			String sLine;

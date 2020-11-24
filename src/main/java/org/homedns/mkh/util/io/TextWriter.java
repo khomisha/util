@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.homedns.mkh.util;
+package org.homedns.mkh.util.io;
 
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -24,34 +24,18 @@ import java.nio.file.Path;
  *
  */
 public class TextWriter {
-	private Path path;
 	
 	/**
-	 * @param path the path to target file
-	 */
-	public TextWriter( Path path ) {
-		setPath( path );
-	}
-
-	/**
-	 * Sets path to file
+	 * Writes string into the file in UTF-8 encoding
 	 * 
-	 * @param path the path to file to set
-	 */
-	public void setPath( Path path ) {
-		this.path = path;
-	}
-	
-	/**
-	 * Writes string into the file
-	 * 
-	 * @param s
+	 * @param path the file path
+	 * @param sContent the content to write
 	 * 
 	 * @throws Exception
 	 */
-	public void write( String s ) throws Exception {
+	public static void write( Path path, String sContent ) throws Exception {
 		try( PrintWriter out = new PrintWriter( path.toFile( ), "UTF-8" ) ) {
-			out.print( s );
+			out.print( sContent );
 		}
 	}
 }
