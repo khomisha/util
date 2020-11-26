@@ -24,7 +24,7 @@ public interface FileManager {
 	public static final int COPY = 0;
 	public static final int REMOVE = 2;
 	public static final int LS = 3;
-	public static final int CD = 4;
+	public static final int MV = 4;
 	
 	/**
 	 * Sets root path

@@ -132,8 +132,8 @@ public class SSHFileManager implements FileManager {
 			case LS:
 				sResult = execCommand( "ls " + sParams );
 				break;
-			case CD:
-				sResult = execCommand( "cd " + sParams );
+			case MV:
+				sResult = execCommand( "mv " + sParams );
 				break;
 			default:
 				throw new IllegalArgumentException( iCommand + ": " + sParams );

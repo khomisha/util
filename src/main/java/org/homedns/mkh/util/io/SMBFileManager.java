@@ -77,7 +77,7 @@ public class SMBFileManager implements FileManager {
 				break;
 			case LS:
 				break;
-			case CD:
+			case MV:
 				break;
 			default:
 				throw new IllegalArgumentException( iCommand + ": " + sParams );
