@@ -66,8 +66,7 @@ public class Data extends ArrayList< ArrayList< Serializable > > implements Seri
 	 * @return the data cell value
 	 */
 	public Object getValue( int iRow, int iCol ) {
-		ArrayList< Serializable > row = get( iRow );
-		return( row.get( iCol ) );
+		return( get( iRow ).get( iCol ) );
 	}
 
 	/**
@@ -101,8 +100,7 @@ public class Data extends ArrayList< ArrayList< Serializable > > implements Seri
 	 *            the column index
 	 */
 	public void removeValue( int iRow, int iCol ) {
-		ArrayList< Serializable > row = get( iRow );
-		row.remove( iCol );
+		get( iRow ).remove( iCol );
 	}
 	
 	/**
@@ -116,7 +114,6 @@ public class Data extends ArrayList< ArrayList< Serializable > > implements Seri
 	 *            the value to set
 	 */
 	public < T extends Serializable > void setValue( int iRow, int iCol, T value ) {
-		ArrayList< Serializable > row = get( iRow );
-		row.set( iCol, value );
+		get( iRow ).set( iCol, value );
 	}
 }
