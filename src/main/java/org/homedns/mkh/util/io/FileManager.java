@@ -21,8 +21,8 @@ package org.homedns.mkh.util.io;
  *
  */
 public interface FileManager {
-	public static final int COPY = 0;
-	public static final int REMOVE = 2;
+	public static final int CP = 0;
+	public static final int RM = 2;
 	public static final int LS = 3;
 	public static final int MV = 4;
 	
@@ -74,7 +74,7 @@ public interface FileManager {
 	 * 
 	 * @throws Exception
 	 */
-	public String execCommand( int iCommand, String sParams ) throws Exception;
+	public Object execCommand( int iCommand, String sParams ) throws Exception;
 	
 	/**
 	 * Closes file manager and it's resources

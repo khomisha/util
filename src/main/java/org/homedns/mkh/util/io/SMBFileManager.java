@@ -16,18 +16,45 @@
 
 package org.homedns.mkh.util.io;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.log4j.Logger;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileInputStream;
+import jcifs.smb.SmbFileOutputStream;
+
 /**
- * The file manager
+ * SMB file manager
  *
  */
 public class SMBFileManager implements FileManager {
-	private String sPath;	
+	private static final Logger LOG = Logger.getLogger( SMBFileManager.class );
+
+	private String sPath;
+	private NtlmPasswordAuthentication auth;
+	private String sHost;
 	
 	/**
-	 * @param sPath the root path
+	 * @param sHost the host
 	 */
-	public SMBFileManager( String sPath ) {
-		setRootPath( sPath );
+	public SMBFileManager( String sHost ) {
+		auth = NtlmPasswordAuthentication.ANONYMOUS;
+		this.sHost = sHost;
+	}
+	
+	/**
+	 * @param sUserName the user
+	 * @param sPassword the password
+	 * @param sHost the host
+	 */
+	public SMBFileManager( String sUserName, String sPassword, String sHost ) {
+		auth = new NtlmPasswordAuthentication( null, sUserName, sPassword );
+		this.sHost = sHost;
 	}
 	
 	/**
@@ -51,8 +78,18 @@ public class SMBFileManager implements FileManager {
 	 */
 	@Override
 	public String read( String sPath ) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		SmbFile source = new SmbFile( "smb://" + sHost + sPath, auth );
+		StringBuffer sb = new StringBuffer( );
+		try( BufferedReader in = new BufferedReader( new InputStreamReader( new SmbFileInputStream( source ) ) ) ) {
+			String sLine;
+			while( ( sLine = in.readLine( ) ) != null ) {
+				sb.append( sLine );
+			}
+		}
+		finally {
+			close( );
+		}
+		return( sb.toString( ) );
 	}
 
 	/**
@@ -60,28 +97,59 @@ public class SMBFileManager implements FileManager {
 	 */
 	@Override
 	public void write( String sContent, String sPath ) throws Exception {
-		// TODO Auto-generated method stub
-		
+		SmbFile source = new SmbFile( "smb://" + sHost + sPath, auth );
+		try( PrintWriter out = new PrintWriter( new SmbFileOutputStream( source ) ) ) {
+			out.print( sContent );
+		}
+		finally {
+			close( );
+		}
 	}
 
 	/**
 	 * @see org.homedns.mkh.util.io.FileManager#execCommand(int, java.lang.String)
 	 */
 	@Override
-	public String execCommand( int iCommand, String sParams ) throws Exception {
+	public Object execCommand( int iCommand, String sParams ) throws Exception {
 		String sResult = null;
+		String[] as = null;
+		SmbFile source = null;
 		switch( iCommand ) {
-			case COPY:
+			case CP:
+				as = sParams.split( " " );
+				source = new SmbFile( "smb://" + sHost + as[ 0 ], auth );
+				source.copyTo( new SmbFile( "smb://" + sHost + as[ 1 ], auth ) );
 				break;
-			case REMOVE:
+			case RM:
+				source = new SmbFile( "smb://" + sHost + sParams, auth );
+				source.delete( );
 				break;
 			case LS:
-				break;
+				String sPath = "smb://" + sHost + sParams;
+				LOG.debug( sPath );
+				SmbFile dir = new SmbFile( "smb://" + sHost + sParams, auth );
+				List< SmbFile > files = Arrays.asList( dir.listFiles( ) );
+				files.sort( this::compare );
+				return( files.stream( ).map( f -> f.getName( ) ).collect( Collectors.toList( ) ) );
 			case MV:
+				as = sParams.split( " " );
+				source = new SmbFile( "smb://" + sHost + as[ 0 ], auth );
+				source.renameTo( new SmbFile( "smb://" + sHost + as[ 1 ], auth ) );
 				break;
 			default:
 				throw new IllegalArgumentException( iCommand + ": " + sParams );
 		}
 		return( sResult );
+	}
+	
+	/**
+	 * @see java.util.Comparator#compare(Object, Object)
+	 */
+	private int compare( SmbFile file1, SmbFile file2 ) {
+		return( 			
+			( file1.getLastModified( ) == file2.getLastModified( ) ) ? 
+			0 : 
+			( file1.getLastModified( ) > file2.getLastModified( ) ) ? 1 : -1
+		);
 	}
 }

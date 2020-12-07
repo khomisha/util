@@ -19,6 +19,10 @@ package org.homedns.mkh.util.io;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
@@ -40,16 +44,20 @@ public class SSHFileManager implements FileManager {
 	private int iPort = 22;
 	private String sPath;
 	private Channel channel;
+	private Map< Integer, String > templates;
 	
 	/**
 	 * @param sUserName the user name
 	 * @param sPassword the password
 	 * @param sHost the host
+	 * 
+	 * @throws Exception 
 	 */
-	public SSHFileManager( String sUserName, String sPassword, String sHost ) {
+	public SSHFileManager( String sUserName, String sPassword, String sHost ) throws Exception {
 		this.sUserName = sUserName;
 		this.sPassword = sPassword;
 		this.sHost = sHost;
+		setCommandTemplate( );
 	}
 
 	/**
@@ -57,12 +65,15 @@ public class SSHFileManager implements FileManager {
 	 * @param sPassword the password
 	 * @param sHost the host
 	 * @param iPort the port
+	 * 
+	 * @throws Exception 
 	 */
-	public SSHFileManager( String sUserName, String sPassword, String sHost, int iPort ) {
+	public SSHFileManager( String sUserName, String sPassword, String sHost, int iPort ) throws Exception {
 		this.sUserName = sUserName;
 		this.sPassword = sPassword;
 		this.sHost = sHost;
 		this.iPort = iPort;
+		setCommandTemplate( );
 	}
 
 	/**
@@ -120,25 +131,16 @@ public class SSHFileManager implements FileManager {
 	 * @see org.homedns.mkh.util.io.FileManager#execCommand(int, java.lang.String)
 	 */
 	@Override
-	public String execCommand( int iCommand, String sParams ) throws Exception {
-		String sResult = null;
-		switch( iCommand ) {
-			case COPY:
-				sResult = execCommand( "cp " + sParams );
-				break;
-			case REMOVE:
-				sResult = execCommand( "rm " + sParams );
-				break;
-			case LS:
-				sResult = execCommand( "ls " + sParams );
-				break;
-			case MV:
-				sResult = execCommand( "mv " + sParams );
-				break;
-			default:
-				throw new IllegalArgumentException( iCommand + ": " + sParams );
+	public Object execCommand( int iCommand, String sParams ) throws Exception {
+		String sCommand = templates.get( iCommand );
+		if( sCommand == null ) {
+			throw new IllegalArgumentException( iCommand + ": " + sParams );
 		}
-		return( sResult );
+		if( iCommand == FileManager.LS ) {
+			return( Arrays.asList( execCommand( sCommand + sParams ).split( "\n" ) ) );
+		} else {
+			return( execCommand( sCommand + sParams ) );
+		}
 	}
 
 	/**
@@ -186,6 +188,17 @@ public class SSHFileManager implements FileManager {
 	}
 	
 	/**
+	 * Returns true if target server OS is windows and false if linux
+	 * 
+	 * @return true or false
+	 * 
+	 * @throws Exception
+	 */
+	private boolean isWindows( ) throws Exception {
+		return( !execCommand( "cmd.exe /c systeminfo" ).isEmpty( ) );
+	}
+	
+	/**
 	 * Opens channel to the ssh server
 	 * 
 	 * @param sType the channel type
@@ -198,5 +211,25 @@ public class SSHFileManager implements FileManager {
         session.setConfig( "StrictHostKeyChecking", "no" );
         session.connect( 10000 );
 		channel = session.openChannel( sType );
+	}
+	
+	/**
+	 * Sets commands templates
+	 * 
+	 * @throws Exception
+	 */
+	private void setCommandTemplate( ) throws Exception {
+		templates = new HashMap< >( );
+		if( isWindows( ) ) {
+			templates.put( FileManager.LS, "cmd.exe /c dir /B /OD " );
+			templates.put( FileManager.CP, "cmd.exe /c copy /Y " );
+			templates.put( FileManager.MV, "cmd.exe /c move /Y " );
+			templates.put( FileManager.RM, "cmd.exe /c erase /Q " );
+		} else {
+			templates.put( FileManager.LS, "ls -tr " );
+			templates.put( FileManager.CP, "cp " );
+			templates.put( FileManager.MV, "mv -f " );
+			templates.put( FileManager.RM, "rm -f " );			
+		}
 	}
 }
