@@ -17,11 +17,7 @@
 package org.homedns.mkh.util;
 
 import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Result object
@@ -31,19 +27,15 @@ import java.util.Map;
  */
 public class Result {
 	public static final Integer SUCCESS = 1;
-	public static final Integer FAILURE = -1;
-	private static final String DATA_TABLE 		= "data";
-	private static final String RETURN_CODE 	= "return_code";
-	private static final String MESSAGE 		= "message";
-	private static final String RETURN_VALUES 	= "return_values";
+	public static final Integer FAILURE = 0;
 
 	private String id;
-	private AttributeMap< String, Serializable > attributes;
-	private Map< String, Type > types;
+	private Integer iReturnCode;
+	private String[][] dataTable;
+	private String sMessage;
+	private List< Serializable > returnValues;
 	
 	public Result( ) {
-		attributes = new AttributeMap< >( );
-		types = new HashMap< >( );
 		setReturnCode( SUCCESS );
 	}
 
@@ -53,7 +45,7 @@ public class Result {
 	 * @return the data table
 	 */
 	public String[][] getDataTable( ) {
-		return( getAttribute( String[][].class, DATA_TABLE ) );
+		return( dataTable );
 	}
 	
 	/**
@@ -62,7 +54,7 @@ public class Result {
 	 * @param data the data table to set
 	 */
 	public void setDataTable( String[][] dataTable ) {
-		setAttribute( DATA_TABLE, dataTable );
+		this.dataTable = dataTable;
 	}
 	
 	/**
@@ -70,8 +62,8 @@ public class Result {
 	 * 
 	 * @return the return code
 	 */
-	public int getReturnCode( ) {
-		return( getAttribute( Integer.class, RETURN_CODE ) );		
+	public Integer getReturnCode( ) {
+		return( iReturnCode );		
 	}
 	
 	/**
@@ -79,8 +71,8 @@ public class Result {
 	 * 
 	 * @param iReturnCode the return code to set
 	 */
-	public void setReturnCode( int iReturnCode ) {
-		setAttribute( RETURN_CODE, iReturnCode );
+	public void setReturnCode( Integer iReturnCode ) {
+		this.iReturnCode = iReturnCode;
 	}
 	
 	/**
@@ -89,7 +81,7 @@ public class Result {
 	 * @return the message
 	 */
 	public String getMessage( ) {
-		return( getAttribute( String.class, MESSAGE ) );
+		return( sMessage );
 	}
 	
 	/**
@@ -98,29 +90,7 @@ public class Result {
 	 * @param sMessage the message to set
 	 */
 	public void setMessage( String sMessage ) {
-		setAttribute( MESSAGE, sMessage );
-	}
-	
-	/**
-	 * Returns specified arbitrary data object
-	 * 
-	 * @param sKey the key 
-	 * 
-	 * @return the data list or null
-	 */
-	public < T extends Serializable > T getData( String sKey ) {
-		return( getAttribute( types.get( sKey ), sKey ) );
-	}
-
-	/**
-	 * Sets arbitrary data object
-	 * 
-	 * @param sKey the key
-	 * @param data the data
-	 */
-	public void setData( String sKey, Serializable data ) {
-		types.put( sKey, data.getClass( ) );
-		setAttribute( sKey, data );
+		this.sMessage = sMessage;
 	}
 
 	/**
@@ -129,12 +99,7 @@ public class Result {
 	 * @return the returnValues
 	 */
 	public List< Serializable > getReturnValues( ) {
-		List< Serializable > values = getData( RETURN_VALUES );
-		if( values == null ) {
-			values = new ArrayList< >( );
-			setReturnValues( values );
-		}
-		return( values );
+		return( returnValues );
 	}
 	
 	/**
@@ -143,7 +108,7 @@ public class Result {
 	 * @param returnValues the returnValues to set
 	 */
 	public void setReturnValues( List< Serializable > returnValues ) {
-		setData( RETURN_VALUES, ( Serializable )returnValues );
+		this.returnValues = returnValues;
 	}
 
 	/**
@@ -162,36 +127,5 @@ public class Result {
 	 */
 	public void setId( String id ) {
 		this.id = id;
-	}
-	
-	/**
-	* Returns attribute value.
-	*
-	* @param type the expected attribute type
-	* @param sKey the attribute key
-	*
-	* @return attribute value or null
-	*/
-	@SuppressWarnings("unchecked")
-	private < T extends Serializable > T getAttribute( Type type, String sKey ) {
-		Serializable value = attributes.getAttribute( sKey );
-		if( value == null ) {
-			return( null );
-		}
-		if( type == value.getClass( ) ) {
-			return( ( T )value );
-		} else {
-			throw new IllegalArgumentException( type.getTypeName( ) );
-		}
-	}
-
-	/**
-	 * Sets attribute value
-	 * 
-	 * @param sKey the attribute key
-	 * @param value the attribute value
-	 */
-	private void setAttribute( String sKey, Serializable value ) {
-		attributes.setAttribute( sKey, value );
 	}
 }

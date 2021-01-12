@@ -48,6 +48,9 @@ public class Util {
 	public static final Pattern IP4_PATTERN = Pattern.compile( "(?:\\b|^)((?:(?:(?:\\d)|(?:\\d{2})|(?:1\\d{2})|(?:2[0-4]\\d)|(?:25[0-5]))\\.){3}(?:(?:(?:\\d)|(?:\\d{2})|(?:1\\d{2})|(?:2[0-4]\\d)|(?:25[0-5]))))(?:\\b|$)" );
 	public static final Pattern RF_ZIP_CODE_PATTERN = Pattern.compile( "^(\\d{6})(?:)?$" );
 	public static final Pattern MONEY_PATTERN = Pattern.compile( "[0-9]*(\\.[0-9][0-9])?$" );
+	public static final Pattern JSON_FILENAME_PATTERN = Pattern.compile( "([a-zA-Z0-9\\s_\\\\.\\-\\(\\):])+(.json)$" );
+	public static final Pattern PORT_PATTERN = Pattern.compile( "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$" );
+
 	private static final String HEXES = "0123456789abcdef";
 	
 	/**
@@ -135,7 +138,7 @@ public class Util {
 	 * @return true or false
 	 */
 	public static boolean isValid( String sRegex, String s ) {
-		if( sRegex.isEmpty( ) || sRegex == null || s == null ) {
+		if( sRegex == null || sRegex.isEmpty( ) || s == null ) {
 			return( true );
 		}
 		Pattern pattern = Pattern.compile( sRegex );
@@ -158,14 +161,14 @@ public class Util {
 	 * 
 	 * @return the hex string
 	 */
-	public static String toHex( String s ) {
-		StringBuffer sb = new StringBuffer( );
-		char[] ac = s.toCharArray( );
-		for( char c : ac ) {
-			sb.append( Integer.toHexString( c ) );
-		}
-      	return( sb.toString( ) );
-	}
+//	public static String toHex( String s ) {
+//		StringBuffer sb = new StringBuffer( );
+//		char[] ac = s.toCharArray( );
+//		for( char c : ac ) {
+//			sb.append( Integer.toHexString( c ) );
+//		}
+//      	return( sb.toString( ) );
+//	}
 	
 	/**
 	 * Converts specified byte array to the hex string
@@ -251,4 +254,14 @@ public class Util {
 	    byte[] bytes = DatatypeConverter.parseHexBinary( sHex );
 	    return new String( bytes, "UTF-8" );
 	}
+	
+	/**
+	 * Returns true if this machine OS is windows and false if linux
+	 * 
+	 * @return true or false
+	 */
+	public static boolean isWindows( ) {
+		return( System.getProperty( "os.name" ).toLowerCase( ).startsWith( "windows" ) );
+	}
+
 }

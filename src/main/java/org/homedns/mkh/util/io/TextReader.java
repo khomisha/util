@@ -17,8 +17,11 @@
 package org.homedns.mkh.util.io;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
+
+import org.apache.commons.io.input.BOMInputStream;
 
 /**
  * Reader text from the file 
@@ -37,7 +40,7 @@ public class TextReader {
 	 */
 	public static String read( Path path ) throws Exception {
 		StringBuffer sb = new StringBuffer( );
-		try( BufferedReader in = new BufferedReader( new FileReader( path.toFile( ) ) ) ) {
+		try( BufferedReader in = new BufferedReader( new InputStreamReader( new BOMInputStream( new FileInputStream( path.toFile( ) ) ) ) ) ) {
 			String sLine;
 			while( ( sLine = in.readLine( ) ) != null ) {
 				sb.append( sLine );

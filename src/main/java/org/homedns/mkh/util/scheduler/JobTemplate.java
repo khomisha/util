@@ -19,6 +19,8 @@
 package org.homedns.mkh.util.scheduler;
 
 import java.util.regex.Pattern;
+
+import org.homedns.mkh.util.Util;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.SchedulerException;
@@ -106,9 +108,9 @@ public interface JobTemplate {
 	 * @return true if the string is a valid cron expression, false otherwise.
 	 */
 	public default boolean isValidCronExp( String sCron ) throws SchedulerException { 
-		if( !CRON_EXP_PATTERN.matcher( sCron ).matches( ) ) {
+		if( !Util.isValid( CRON_EXP_PATTERN, sCron ) ) {
 			SchedulerException e = new SchedulerException( sCron );
-			throw e;
+			throw e;			
 		}
 	  return( true );  
 	}

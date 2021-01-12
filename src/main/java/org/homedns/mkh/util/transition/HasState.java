@@ -44,4 +44,21 @@ public interface HasState {
 	 * @param newState the state to change
 	 */
 	public void changeStateTo( int iNewState ) throws Exception;
+	
+	/**
+	 * Returns transition parameter
+	 * 
+	 * @return the transition parameter
+	 */
+	public default Object getTransitionParam( ) {
+		return( null );
+	}
+	
+	/**
+	 * Sets transition parameter
+	 * 
+	 * @param param the transition parameter to set
+	 */
+	public default void setTransitionParam( Object param ) {
+	}
 }
