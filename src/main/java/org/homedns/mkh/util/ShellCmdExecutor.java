@@ -22,17 +22,20 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 /**
  * Shell commands executor
  *
  */
 public class ShellCmdExecutor {
+	private static final Logger LOG = Logger.getLogger( ShellCmdExecutor.class );
+
 	private File workingDir;
 	
 	public ShellCmdExecutor( ) {
+		// default working directory
 		setWorkingDir( Paths.get( System.getProperty( "user.home" ) ) );
 	}
 	
@@ -47,43 +50,35 @@ public class ShellCmdExecutor {
 	 * Executes specified shell command
 	 * 
 	 * @param command the command to execute
+	 * @param bBuiltin the built in command flag, only applicable for linux
 	 * 
 	 * @return the result (if any)
 	 * 
 	 * @throws Exception
 	 */
-	public String execute( String ...command ) throws Exception {
-		return( execute( new ArrayList< >( Arrays.asList( command ) ) ) );
-	}
-
-	/**
-	 * Executes specified shell command
-	 * 
-	 * @param command the command to execute
-	 * 
-	 * @return the result (if any)
-	 * 
-	 * @throws Exception
-	 */
-	public String execute( List< String > command ) throws Exception {
+	public List< String > execute( List< String > command, boolean bBuiltin ) throws Exception {
 		if( Util.isWindows( ) ) {
-			command.add( 0, "cmd.exe /c" );
+			command.add( 0, "cmd.exe" );	// ??? it may not work when command is fixed-size list backed by the array.
+			command.add( 1, "/c" );
 		} else {
-			command.add( 0, "./" );			
+			if( !bBuiltin ) {
+				command.set( 0, "./" + command.get( 0 ) );
+			}
 		}
 		ProcessBuilder builder = new ProcessBuilder( );
 		builder.directory( workingDir );
 		builder.command( command );
-	    StringBuilder output = new StringBuilder( );
+		LOG.debug( builder.command( ) );
+	    List< String > output = new ArrayList< >( );
 		Process process = builder.start( );
 		try( BufferedReader in = new BufferedReader( new InputStreamReader( process.getInputStream( ) ) ) ) {
-			in.lines( ).forEach( output::append );
+			in.lines( ).forEach( output::add );
 		}
 		int iExit = process.waitFor( );
 		if( iExit != 0 ) {
 			throw new IllegalArgumentException( "Failure executing command: " + command );
 		}
-		return( output.toString( ) );
+		return( output );
 	}
 
 	/**

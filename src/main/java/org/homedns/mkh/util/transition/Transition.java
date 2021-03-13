@@ -60,11 +60,23 @@ public abstract class Transition {
 			tc.executeAfter( target );
 		}
 		catch( UnsupportedOperationException e ) {
-			LOG.error( e.getMessage( ), e );
+			LOG.error( e.getMessage( ) + " change to state: " + iNewState );
 		}
 		catch( IllegalArgumentException e ) {
-			LOG.error( e.getMessage( ) );			
+			LOG.error( e.getMessage( ) + " change to state: " + iNewState );			
 		}
+		catch( TransitionException e ) {
+			LOG.error( e.getMessage( ) + " " + e.getCause( ).getMessage( ) );
+		}
+	}
+	
+	/**
+	 * Makes transition table
+	 * 
+	 * @return the transition table
+	 */
+	protected TransitionCommand[][] doTransitionTable( ) {
+		return( null );
 	}
 	
 	/**
@@ -91,7 +103,7 @@ public abstract class Transition {
 		return( transitionTable[ iCurrentState ][ iNewState ] );
 	}
 	
-	protected class NoCommand implements TransitionCommand {
+	public class NoCommand implements TransitionCommand {
 		
 		public NoCommand( ) {
 		}
@@ -101,7 +113,7 @@ public abstract class Transition {
 		}
 	}
 	
-	protected class WrongCommand implements TransitionCommand {
+	public class WrongCommand implements TransitionCommand {
 		
 		public WrongCommand( ) {
 		}
