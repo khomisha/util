@@ -65,9 +65,6 @@ public abstract class Transition {
 		catch( IllegalArgumentException e ) {
 			LOG.error( e.getMessage( ) + " change to state: " + iNewState );			
 		}
-		catch( TransitionException e ) {
-			LOG.error( e.getMessage( ) + " " + e.getCause( ).getMessage( ) );
-		}
 	}
 	
 	/**

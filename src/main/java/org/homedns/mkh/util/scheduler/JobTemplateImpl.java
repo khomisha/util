@@ -24,8 +24,6 @@ import org.quartz.JobDataMap;
 /**
  * Implements @see org.homedns.mkh.ledgerpipe.JobTemplate
  * 
- * @author Mikhail Khodonov
- *
  */
 public class JobTemplateImpl implements JobTemplate {
 	private String sName;

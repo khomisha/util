@@ -16,21 +16,25 @@
 
 package org.homedns.mkh.util;
 
+
 /**
  * Call back interface
  *
- * @param <T> input parameter type
- * @param <V> return object type
+ * @param <T> the call result type
  */
-public interface Callback< T, V > {
+public interface Callback< T > {
 	
-	/**
-	 * Performs arbitrary action
-	 * 
-	 * @param param the input parameter
-	 * 
-	 * @return the result
-	 */
-	public V performAction( T param );
+	  /**
+	   * Called when a call fails to complete normally.
+	   * 
+	   * @param caught failure encountered while executing a call
+	   */
+	  void onFailure( Throwable caught );
 
+	  /**
+	   * Called when a call completes successfully.
+	   * 
+	   * @param result the return value of the call
+	   */
+	  void onSuccess( T result );
 }

@@ -28,7 +28,6 @@ import org.quartz.SchedulerException;
 /**
  * Scheduled job template
  *
- * @author Mikhail Khodonov
  */
 public interface JobTemplate {
 	public static final Pattern CRON_EXP_PATTERN = Pattern.compile( 
