@@ -19,9 +19,7 @@
 package org.homedns.mkh.util.scheduler;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.log4j.Logger;
 import org.homedns.mkh.util.Util;
 import org.quartz.CronScheduleBuilder;
@@ -40,63 +38,99 @@ import org.quartz.TriggerKey;
 import org.quartz.listeners.TriggerListenerSupport;
 
 /**
- * Job scheduler object
+ * Scheduler helper object
  *
  */
-public class JobScheduler {
-	private static final Logger LOG = Logger.getLogger( JobScheduler.class );
+public class SchedulerHelper {
+	private static final Logger LOG = Logger.getLogger( SchedulerHelper.class );
 
-	private static Map< JobKey, String > jobsMap = new HashMap< JobKey, String >( );
 	public static Scheduler scheduler;
-	
-	public JobScheduler( ) throws SchedulerException {
-		scheduler = StdSchedulerFactory.getDefaultScheduler( );		
-		scheduler.getListenerManager( ).addTriggerListener( new TriggerListener( ) );
-	}
-	
-	/**
-	 * @param jobs the job templates list
-	 * 
-	 * @throws SchedulerException 
-	 */
-	public JobScheduler( List< JobTemplate > jobTmps ) throws SchedulerException {
-		this( );
-		scheduleJobs( jobTmps );
-	}
-
-	/**
-	 * Schedules jobs, which created from specified job templates list
-	 * 
-	 * @param jobTmps the job templates list
-	 * 
-	 * @throws SchedulerException
-	 */
-	public void scheduleJobs( List< JobTemplate > jobTmps ) throws SchedulerException {
-		for( JobTemplate tmp : jobTmps ) {
-			scheduler.scheduleJob( createJob( tmp ), createTrigger( tmp ) );
-			LOG.info( tmp.getName( ) + " is scheduled successfully. Schedule: " + tmp.getCronExp( ) );
+	static {
+		try {
+			scheduler = StdSchedulerFactory.getDefaultScheduler( );
+			scheduler.getListenerManager( ).addTriggerListener( new TriggerListener( ) );		
 		}
+		catch( SchedulerException e ) {
+			LOG.error( e.getMessage( ), e );
+		}		
 	}
 	
 	/**
-	 * Adds jobs for later use, which created specified job templates list
+	 * Schedules jobs, which are created from specified job templates list
 	 * 
 	 * @param jobTmps the job templates list
 	 * 
-	 * @return the added jobs keys
+	 * @return the trigger key list
 	 * 
 	 * @throws SchedulerException
 	 */
-	public List< JobKey > addJobs( List< JobTemplate > jobTmps ) throws SchedulerException {
+	public static List< TriggerKey > scheduleJobs( List< JobTemplate > jobTmps ) throws SchedulerException {
+		List< TriggerKey > triggerKeys = new ArrayList< >( );
+		for( JobTemplate tmp : jobTmps ) {
+			triggerKeys.add( scheduleJob( tmp ) );
+		}
+		return( triggerKeys );
+	}
+	
+	/**
+	 * Schedules job which is created from specified job template
+	 * 
+	 * @param jobTmps the job template
+	 * 
+	 * @return the trigger key
+	 * 
+	 * @throws SchedulerException
+	 */
+	public static TriggerKey scheduleJob( JobTemplate jobTmp ) throws SchedulerException {
+		Trigger trigger = createTrigger( jobTmp ); 
+		scheduler.scheduleJob( createJob( jobTmp ), trigger );
+		LOG.info( jobTmp.getName( ) + " is scheduled successfully. Schedule: " + jobTmp.getCronExp( ) );
+		return( trigger.getKey( ) );
+	}
+	
+	/**
+	 * Unschedules job
+	 * 
+	 * @param triggerKey the trigger key
+	 * 
+	 * @throws SchedulerException
+	 */
+	public static void unscheduleJob( TriggerKey triggerKey ) throws SchedulerException {
+		scheduler.unscheduleJob( triggerKey );
+	}
+	
+	/**
+	 * Adds jobs to the scheduler for later use, they are created using specified job templates list
+	 * 
+	 * @param jobTmps the job templates list
+	 * 
+	 * @return the job key list
+	 * 
+	 * @throws SchedulerException
+	 */
+	public static List< JobKey > addJobs( List< JobTemplate > jobTmps ) throws SchedulerException {
 		List< JobKey > jobKeys = new ArrayList< >( );
 		for( JobTemplate tmp : jobTmps ) {
-			JobDetail jd = createJob( tmp );
-			scheduler.addJob( jd, false );
-			jobKeys.add( jd.getKey( ) );
+			jobKeys.add( addJob( tmp ) );
 		}	
 		return( jobKeys );
 	}
 	
+	/**
+	 * Adds job to the scheduler for later use, it is created using specified job template
+	 * 
+	 * @param jobTmp the job template
+	 * 
+	 * @return the job key
+	 * 
+	 * @throws SchedulerException
+	 */
+	public static JobKey addJob( JobTemplate jobTmp ) throws SchedulerException {
+		JobDetail jd = createJob( jobTmp );
+		scheduler.addJob( jd, false );
+		return( jd.getKey( ) );
+	}
+
 	/**
 	 * Creates job using specified job template
 	 * 
@@ -106,18 +140,16 @@ public class JobScheduler {
 	 * 
 	 * @throws SchedulerException
 	 */
-	private JobDetail createJob( JobTemplate tmp ) throws SchedulerException {
+	private static JobDetail createJob( JobTemplate tmp ) throws SchedulerException {
 		JobKey key = generateJobKey( );
 		JobBuilder jbuilder = JobBuilder
 			.newJob( tmp.getJobClazz( ) )
 			.withIdentity( key )
 			.usingJobData( "name", tmp.getName( ) );
 		jbuilder = ( tmp.getJobData( ) == null ) ? jbuilder : jbuilder.usingJobData( tmp.getJobData( ) );
-		JobDetail job = jbuilder.build( );
-		jobsMap.put( key, tmp.getName( ) );
-		return( job );
+		return( jbuilder.build( ) );
 	}
-	
+		
 	/**
 	 * Creates trigger using specified job template
 	 * 
@@ -127,45 +159,23 @@ public class JobScheduler {
 	 * 
 	 * @throws SchedulerException
 	 */
-	private CronTrigger createTrigger( JobTemplate tmp ) throws SchedulerException {
+	private static CronTrigger createTrigger( JobTemplate tmp ) throws SchedulerException {
 		tmp.isValidCronExp( tmp.getCronExp( ) );
 		CronScheduleBuilder csb = CronScheduleBuilder.cronSchedule( tmp.getCronExp( ) );
-		CronTrigger trigger = (
-			TriggerBuilder.newTrigger( )
-				.withIdentity( generateTriggerKey( ) )
-				.withSchedule( csb )
-				.build( )
-		);
+		CronTrigger trigger = TriggerBuilder
+			.newTrigger( )
+			.withIdentity( generateTriggerKey( ) )
+			.withSchedule( csb )
+			.build( );
 		return( trigger );
 	}
-	
-	/**
-	 * Returns job's name by it's key
-	 * 
-	 * @param jobKey
-	 *            the job key
-	 * 
-	 * @return the job name
-	 */
-	public static String getJobName( JobKey jobKey ) {
-		return( jobsMap.get( jobKey ) );
-	}
-	
-	/**
-	 * Returns jobs pool empty flag
-	 * 
-	 * @return true if jobs pool is empty and false otherwise
-	 */
-	public static boolean isJobPoolEmpty( ) {
-		return( jobsMap.isEmpty( ) );
-	}
-		
+
 	/**
 	 * Generates job key
 	 * 
 	 * @return the job key
 	 */
-	private JobKey generateJobKey( ) {
+	private static JobKey generateJobKey( ) {
 		String sUID = Util.getGUID( );
 		return( JobKey.jobKey( sUID, "group_" + sUID ) );
 	}
@@ -175,12 +185,12 @@ public class JobScheduler {
 	 * 
 	 * @return the trigger key
 	 */
-	private TriggerKey generateTriggerKey( ) {
+	private static TriggerKey generateTriggerKey( ) {
 		String sUID = Util.getGUID( );
 		return( TriggerKey.triggerKey( sUID, "group_" + sUID ) ); 
 	}
 	
-	private class TriggerListener extends TriggerListenerSupport {
+	private static class TriggerListener extends TriggerListenerSupport {
 
 		/**
 		 * @see org.quartz.TriggerListener#getName()
@@ -195,7 +205,7 @@ public class JobScheduler {
 		 */
 		@Override
 		public void triggerFired( Trigger trigger, JobExecutionContext context ) {
-//			LOG.debug( getJobName( trigger.getJobKey( ) ) + " is fired" );
+//			LOG.debug( context.getJobDetail( ).getJobDataMap( ).get( "name" ) + " is fired" );
 		}
 
 		/**
@@ -209,13 +219,8 @@ public class JobScheduler {
 		) {
 			try {
 				if( triggerInstructionCode == CompletedExecutionInstruction.SET_TRIGGER_COMPLETE ) {
-					JobKey jobKey = trigger.getJobKey( );
-					LOG.info( getJobName( jobKey ) + ": is unscheduled" );
-					jobsMap.remove( jobKey );
+					LOG.info( context.getJobDetail( ).getJobDataMap( ).get( "name" ) + ": is unscheduled" );
 					scheduler.unscheduleJob( trigger.getKey( ) );
-					if( isJobPoolEmpty( ) ) {
-						LOG.info( "Jobs pool is empty." );
-					}
 				}
 			} 
 			catch( Exception e ) {
