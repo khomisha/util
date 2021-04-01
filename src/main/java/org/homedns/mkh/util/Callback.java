@@ -36,5 +36,5 @@ public interface Callback< T > {
 	   * 
 	   * @param result the return value of the call
 	   */
-	  void onSuccess( T result );
+	  void onSuccess( T result ) throws Exception;
 }

@@ -133,16 +133,15 @@ public class Util {
 	 * Always returns true if sRegex.isEmpty( ) || sRegex == null || s == null. 
 	 * 
 	 * @param sRegex the regex
-	 * @param s the string to test
+	 * @param value the value to test
 	 * 
 	 * @return true or false
 	 */
-	public static boolean isValid( String sRegex, String s ) {
-		if( sRegex == null || sRegex.isEmpty( ) || s == null ) {
+	public static boolean isValid( String sRegex, Object value ) {
+		if( sRegex == null || sRegex.isEmpty( ) || value == null ) {
 			return( true );
 		}
-		Pattern pattern = Pattern.compile( sRegex );
-		return( isValid( pattern, s ) );
+		return( isValid( Pattern.compile( sRegex ), String.valueOf( value ) ) );
 	}
 	
 	/**
