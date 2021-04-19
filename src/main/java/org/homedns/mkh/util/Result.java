@@ -17,6 +17,7 @@
 package org.homedns.mkh.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +38,7 @@ public class Result {
 	
 	public Result( ) {
 		setReturnCode( SUCCESS );
+		returnValues = new ArrayList< >( );
 	}
 
 	/**

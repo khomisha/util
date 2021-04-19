@@ -205,7 +205,7 @@ public class SchedulerHelper {
 		 */
 		@Override
 		public void triggerFired( Trigger trigger, JobExecutionContext context ) {
-//			LOG.debug( context.getJobDetail( ).getJobDataMap( ).get( "name" ) + " is fired" );
+			LOG.debug( context.getJobDetail( ).getJobDataMap( ).get( "name" ) + " is fired" );
 		}
 
 		/**

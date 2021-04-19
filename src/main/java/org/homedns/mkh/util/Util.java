@@ -16,8 +16,12 @@
 
 package org.homedns.mkh.util;
 
-import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -29,7 +33,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.apache.log4j.Logger;
@@ -170,6 +175,17 @@ public class Util {
 //	}
 	
 	/**
+	 * Converts specified string to the hex string
+	 * 
+	 * @param s the string to convert
+	 * 
+	 * @return the hex string
+	 */
+	public static String toHex( String s ) {
+        return( toHex( s.getBytes( StandardCharsets.UTF_8 ) ) );
+	}
+
+	/**
 	 * Converts specified byte array to the hex string
 	 * 
 	 * @param ab the byte array
@@ -177,13 +193,10 @@ public class Util {
 	 * @return the hex string
 	 */
 	public static String toHex( byte[] ab ) {
-		StringBuffer sb = new StringBuffer( );
-		for( byte b : ab ) {
-			sb.append( Integer.toHexString( b & 0xFF ) );
-		}
-      	return( sb.toString( ) );
+		char[] chars = Hex.encodeHex( ab );
+        return( String.valueOf( chars ) );
 	}
-
+	
 	/**
 	 * Converts byte array to the hexadecimal string.
 	 * 
@@ -245,13 +258,16 @@ public class Util {
 	 * @param sHex the source hex string
 	 * 
 	 * @return the result string
-	 * 
-	 * @throws UnsupportedEncodingException
 	 */
-	public static String fromHex( String sHex ) throws UnsupportedEncodingException {
-//	    hex = hex.replaceAll("^(00)+", "");
-	    byte[] bytes = DatatypeConverter.parseHexBinary( sHex );
-	    return new String( bytes, "UTF-8" );
+	public static String fromHex( String sHex ) {
+        String s = "";
+        try {
+            byte[] ab = Hex.decodeHex( sHex );
+            s = new String( ab, StandardCharsets.UTF_8 );
+        } catch( DecoderException e ) {
+            throw new IllegalArgumentException( "Invalid Hex format." );
+        }
+        return( s );
 	}
 	
 	/**
@@ -261,6 +277,28 @@ public class Util {
 	 */
 	public static boolean isWindows( ) {
 		return( System.getProperty( "os.name" ).toLowerCase( ).startsWith( "windows" ) );
+	}
+	
+	/**
+	 * Converts serializable object to the byte array
+	 * 
+	 * @param obj the object ot convert
+	 * 
+	 * @return the byte array
+	 * 
+	 * @throws IOException
+	 */
+	public static byte[] toByteArray( Serializable obj ) throws IOException {
+		byte [] ab = null;
+		try(
+			ByteArrayOutputStream baos = new ByteArrayOutputStream( );
+			ObjectOutputStream oos = new ObjectOutputStream( baos );
+		) {
+			oos.writeObject( obj );
+			oos.flush( );
+			ab = baos.toByteArray( );
+		}
+		return( ab );
 	}
 
 }
