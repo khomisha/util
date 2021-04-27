@@ -19,7 +19,6 @@
 package org.homedns.mkh.util.transition;
 
 import java.io.FileNotFoundException;
-
 import org.apache.log4j.Logger;
 
 /**
@@ -56,11 +55,12 @@ public abstract class Transition {
 	 */
 	public void doTransition( int iNewState, HasState target ) throws Exception {
 		try {
-			TransitionCommand tc = getTransitionCommand( iNewState, target.getState( ) );
+			int iOldState = target.getState( );
+			TransitionCommand tc = getTransitionCommand( iNewState, iOldState );
 			tc.executeBefore( target );
 			target.setState( iNewState );
-			tc.executeAfter( target );
-			LOG.info( "state: " + iNewState );
+			tc.executeAfter( target );												// ???
+			LOG.info( iOldState + " -> " + iNewState + " success" );
 		}
 		catch( UnsupportedOperationException | IllegalArgumentException e ) {
 			LOG.error( e.getMessage( ) + " failure to change state: " + iNewState );
@@ -78,6 +78,15 @@ public abstract class Transition {
 		return( null );
 	}
 	
+	/**
+	 * Returns transition table
+	 * 
+	 * @return the transition table
+	 */
+	public TransitionCommand[][] getTransitionTable( ) {
+		return( transitionTable );
+	}
+
 	/**
 	 * Sets state transition table
 	 * 

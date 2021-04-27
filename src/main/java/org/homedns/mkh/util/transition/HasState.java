@@ -43,7 +43,7 @@ public interface HasState {
 	 * 
 	 * @param newState the state to change
 	 */
-	public void changeStateTo( int iNewState ) throws Exception;
+	public void changeStateTo( int iNewState );
 	
 	/**
 	 * Returns transition parameter
