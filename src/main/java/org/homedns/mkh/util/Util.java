@@ -35,6 +35,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.apache.log4j.Logger;
@@ -301,4 +302,15 @@ public class Util {
 		return( ab );
 	}
 
+	/**
+	 * Returns string fills with specified pattern string
+	 * 
+	 * @param sPattern the pattern to fill characters from
+	 * @param iSize the length of the required string
+	 * 
+	 * @return the filled string
+	 */
+	public static String fillString( String sPattern, int iSize ) {
+		return( StringUtils.leftPad( sPattern, iSize ) );
+	}
 }

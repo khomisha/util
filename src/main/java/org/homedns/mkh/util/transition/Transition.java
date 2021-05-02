@@ -54,18 +54,20 @@ public abstract class Transition {
 	 * @throws Exception 
 	 */
 	public void doTransition( int iNewState, HasState target ) throws Exception {
+		int iOldState = target.getState( );
 		try {
-			int iOldState = target.getState( );
 			TransitionCommand tc = getTransitionCommand( iNewState, iOldState );
 			tc.executeBefore( target );
 			target.setState( iNewState );
 			tc.executeAfter( target );												// ???
-			LOG.info( iOldState + " -> " + iNewState + " success" );
 		}
 		catch( UnsupportedOperationException | IllegalArgumentException e ) {
 			LOG.error( e.getMessage( ) + " failure to change state: " + iNewState );
 		}
 		catch( FileNotFoundException e ) {
+		}
+		finally {
+			LOG.info( iOldState + " -> " + target.getState( ) + " success" );			
 		}
 	}
 	

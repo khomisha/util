@@ -19,6 +19,7 @@ package org.homedns.mkh.util;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.apache.log4j.Logger;
 import java.util.List;
 
 /**
@@ -26,6 +27,7 @@ import java.util.List;
  *
  */
 public abstract class Notification {
+	private static final Logger LOG = Logger.getLogger( Notification.class );
     private final Map< Class< ? extends Event >, Map< Class< ? extends Publisher >, List< Subscriber > > > subscribers;
     
     public Notification( ) {
@@ -37,16 +39,24 @@ public abstract class Notification {
      * 
      * @param event the event
      * @param publisher the event source
-     * 
-     * @throws Exception 
      */
-    public void publish( Event event, Publisher publisher ) throws Exception {
-        List< Subscriber > list = subscribers.get( event.getClass( ) ).get( publisher.getClass( ) );
-		if( list != null ) {
-			for( Subscriber s : list ) {
-				s.update( event, publisher );
-			}
- 		}
+    public void publish( Event event, Publisher publisher ) {
+		Thread thread = new Thread( 
+			( ) -> { 
+		        List< Subscriber > list = subscribers.get( event.getClass( ) ).get( publisher.getClass( ) );
+				if( list != null ) {
+					for( Subscriber s : list ) {
+						try {
+							s.update( event, publisher );
+						}
+						catch( Exception e ) {
+							LOG.error( e.getMessage( ), e );
+						}
+					}
+		 		}			
+			} 
+		);
+		thread.start( );
     }
 
     /**
