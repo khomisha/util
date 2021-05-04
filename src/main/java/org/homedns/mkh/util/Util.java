@@ -35,7 +35,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.apache.log4j.Logger;
@@ -303,14 +302,36 @@ public class Util {
 	}
 
 	/**
-	 * Returns string fills with specified pattern string
+	 * Builds a string of the specified length by repeating the specified
+	 * characters until the result string is long enough.
 	 * 
-	 * @param sPattern the pattern to fill characters from
-	 * @param iSize the length of the required string
+	 * @param s
+	 *            a string whose value will be repeated to fill the return
+	 *            string
+	 * @param iN
+	 *            an integer whose value is the length of the string you want
+	 *            returned
 	 * 
-	 * @return the filled string
+	 * @return a string iN characters long filled with the characters in the
+	 *         argument s. If the argument chars has more than iN characters,
+	 *         the first iN characters of s are used to fill the return string.
+	 *         If the argument s has fewer than iN characters, the characters in
+	 *         s are repeated until the return string has iN characters. If any
+	 *         argument's value is null, it returns null.
 	 */
-	public static String fillString( String sPattern, int iSize ) {
-		return( StringUtils.leftPad( sPattern, iSize ) );
+	public static String fill( String s, int iN ) {
+		StringBuffer sb = new StringBuffer( );
+		if( s.length( ) > iN ) {
+			sb.append( s.substring( 0, iN ) );
+		} else {
+			int iCount = iN / s.length( );
+			for( int i = 1; i <= iCount; i++ ) {
+				sb.append( s );
+			}
+			if( iN - sb.length( ) > 0 ) {
+				sb.append( s.substring( 0, iN - sb.length( ) ) );
+			}
+		}
+		return( sb.toString( ) );
 	}
 }
