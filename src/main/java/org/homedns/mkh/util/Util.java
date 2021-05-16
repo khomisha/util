@@ -334,4 +334,20 @@ public class Util {
 		}
 		return( sb.toString( ) );
 	}
+	
+	/**
+	 * Returns stack trace as string
+	 * 
+	 * @param t the throwable
+	 * 
+	 * @return the stack trace
+	 */
+	public static String getStackTrace( Throwable t ) {
+		StringBuffer sb = new StringBuffer( );
+		for( StackTraceElement ste : t.getStackTrace( ) ) {
+			sb.append( ste.toString( ) );
+			sb.append( "\n" );
+		}
+		return( sb.length( ) > 0 ? sb.toString( ) : "empty stack trace" );
+	}
 }
