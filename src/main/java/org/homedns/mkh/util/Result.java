@@ -31,9 +31,9 @@ public class Result {
 	public static final Integer FAILURE = 0;
 
 	private String id;
-	private Integer iReturnCode;
+	private Integer returnCode;
 	private String[][] dataTable;
-	private String sMessage;
+	private String message;
 	private List< Serializable > returnValues;
 	
 	public Result( ) {
@@ -65,7 +65,7 @@ public class Result {
 	 * @return the return code
 	 */
 	public Integer getReturnCode( ) {
-		return( iReturnCode );		
+		return( returnCode );		
 	}
 	
 	/**
@@ -73,8 +73,8 @@ public class Result {
 	 * 
 	 * @param iReturnCode the return code to set
 	 */
-	public void setReturnCode( Integer iReturnCode ) {
-		this.iReturnCode = iReturnCode;
+	public void setReturnCode( Integer returnCode ) {
+		this.returnCode = returnCode;
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class Result {
 	 * @return the message
 	 */
 	public String getMessage( ) {
-		return( sMessage );
+		return( message );
 	}
 	
 	/**
@@ -91,8 +91,8 @@ public class Result {
 	 * 
 	 * @param sMessage the message to set
 	 */
-	public void setMessage( String sMessage ) {
-		this.sMessage = sMessage;
+	public void setMessage( String message ) {
+		this.message = message;
 	}
 
 	/**
@@ -129,5 +129,15 @@ public class Result {
 	 */
 	public void setId( String id ) {
 		this.id = id;
+	}
+	
+	/**
+	 * Sets failure result
+	 * 
+	 * @param e the exception
+	 */
+	public void setFailure( Exception e ) {
+		setReturnCode( Result.FAILURE );
+		setMessage( e.getMessage( ) + "\n" + Util.getStackTrace( e ) );		
 	}
 }
