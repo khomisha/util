@@ -60,14 +60,12 @@ public abstract class Transition {
 			tc.executeBefore( target );
 			target.setState( iNewState );
 			tc.executeAfter( target );												// ???
+			LOG.info( iOldState + " -> " + target.getState( ) + " success" );			
 		}
 		catch( UnsupportedOperationException | IllegalArgumentException e ) {
 			LOG.error( e.getMessage( ) + " failure to change state: " + iNewState );
 		}
 		catch( FileNotFoundException e ) {
-		}
-		finally {
-			LOG.info( iOldState + " -> " + target.getState( ) + " success" );			
 		}
 	}
 	

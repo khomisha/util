@@ -103,8 +103,9 @@ public class GsonAgent {
 			.registerTypeAdapter( Timestamp.class, new TimestampSerializer( ) )
 			.registerTypeAdapter( Timestamp.class, new TimestampDeserializer( ) )
 			.registerTypeAdapterFactory( new SerializableTypeAdapterFactory( ) )
-			.disableHtmlEscaping( )
-			.setPrettyPrinting( );
+			.serializeNulls( )
+			.disableHtmlEscaping( );
+//			.setPrettyPrinting( );
 		if( strategy != null && bSerialization ) {
 			builder = builder.addSerializationExclusionStrategy( strategy );
 		}

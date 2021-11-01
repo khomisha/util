@@ -31,6 +31,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.DecoderException;
@@ -57,6 +58,7 @@ public class Util {
 	public static final Pattern PORT_PATTERN = Pattern.compile( "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$" );
 
 	private static final String HEXES = "0123456789abcdef";
+	private static final String CHARS = "0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,!,?,_,@,#,$,%,&,*,(,),-,+,=,1,2,3,4,5,6,7,8,9,0";
 	
 	/**
 	 * Returns current local date/time as a string
@@ -349,5 +351,39 @@ public class Util {
 			sb.append( "\n" );
 		}
 		return( sb.length( ) > 0 ? sb.toString( ) : "empty stack trace" );
+	}
+	
+	/**
+	 * Returns hash as integer of the specified string
+	 * 
+	 * @param s the string
+	 * 
+	 * @return hash
+	 */
+	public static int getHash( String s ) {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ( ( s == null ) ? 0 : s.hashCode( ) );
+		return result;
+	}
+	
+	/**
+	 * Returns random string of the specified length
+	 * 
+	 * @param iLength the length
+	 *  
+	 * @return random string
+	 */
+	public static String getRandomString( int iLength ) {
+		String[] as = CHARS.split( "," );
+		if( iLength <= 0 ) {
+			return( null );
+		}
+		StringBuffer sb = new StringBuffer( );
+		Random random = new Random( );
+		for( int iIndex = 0; iIndex < iLength; iIndex++ ) {
+			sb.append( as[ random.nextInt( as.length ) ] );
+		}
+		return( sb.toString( ) );
 	}
 }
