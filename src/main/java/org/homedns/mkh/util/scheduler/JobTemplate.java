@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.homedns.mkh.util.Util;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 
 /**
@@ -121,5 +122,22 @@ public interface JobTemplate {
 	 * @param value the value
 	 */
 	public default void add2JobData( String sKey, Object value ) {
+	}
+	
+	/**
+	 * Sets job detail
+	 * 
+	 * @param jobDetail the 
+	 */
+	public default void setJobDetail( JobDetail jobDetail ) {
+	}
+	
+	/**
+	 * Returns job detail
+	 * 
+	 * @return the job detail
+	 */
+	public default JobDetail getJobDetail( ) {
+		return( null );
 	}
 }

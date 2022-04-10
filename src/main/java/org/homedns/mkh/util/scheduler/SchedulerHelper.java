@@ -82,8 +82,10 @@ public class SchedulerHelper {
 	 * @throws SchedulerException
 	 */
 	public static TriggerKey scheduleJob( JobTemplate jobTmp ) throws SchedulerException {
-		Trigger trigger = createTrigger( jobTmp ); 
-		scheduler.scheduleJob( createJob( jobTmp ), trigger );
+		Trigger trigger = createTrigger( jobTmp );
+		JobDetail jd = createJob( jobTmp );
+		jobTmp.setJobDetail( jd );
+		scheduler.scheduleJob( jd, trigger );
 		LOG.info( jobTmp.getName( ) + " is scheduled successfully. Schedule: " + jobTmp.getCronExp( ) );
 		return( trigger.getKey( ) );
 	}

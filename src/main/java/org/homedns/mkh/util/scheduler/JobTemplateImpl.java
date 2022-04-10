@@ -20,6 +20,7 @@ package org.homedns.mkh.util.scheduler;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 
 /**
  * Implements @see org.homedns.mkh.ledgerpipe.JobTemplate
@@ -30,6 +31,7 @@ public class JobTemplateImpl implements JobTemplate {
 	private String sCronExp;
 	private Class< ? extends Job > jobClazz;
 	private JobDataMap jobData;
+	private JobDetail jobDetail;
 
 	/**
 	 * @param sName the name
@@ -93,5 +95,21 @@ public class JobTemplateImpl implements JobTemplate {
 			jobData = new JobDataMap( );
 		}
 		jobData.put( sKey, value );
+	}
+
+	/**
+	 * @see org.homedns.mkh.util.scheduler.JobTemplate#setJobDetail(org.quartz.JobDetail)
+	 */
+	@Override
+	public void setJobDetail( JobDetail jobDetail ) {
+		this.jobDetail = jobDetail;
+	}
+
+	/**
+	 * @see org.homedns.mkh.util.scheduler.JobTemplate#getJobDetail()
+	 */
+	@Override
+	public JobDetail getJobDetail( ) {
+		return( jobDetail );
 	}
 }

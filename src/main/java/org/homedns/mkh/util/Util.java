@@ -21,7 +21,10 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -51,6 +54,8 @@ public class Util {
 	public static final Pattern TIMESTAMP_PATTERN = Pattern.compile( "(^(((\\d\\d)(([02468][048])|([13579][26]))-02-29)|(((\\d\\d)(\\d\\d)))-((((0\\d)|(1[0-2]))-((0\\d)|(1\\d)|(2[0-8])))|((((0[13578])|(1[02]))-31)|(((0[1,3-9])|(1[0-2]))-(29|30)))))\\s(([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d))$)" ); 
 	public static final Pattern EMAIL_PATTERN = Pattern.compile( "^([\\w-]+(?:\\.[\\w-]+)*)@((?:[\\w-]+\\.)*\\w[\\w-]{0,66})\\.([a-z]{2,6}(?:\\.[a-z]{2})?)$" );
 //	public static final Pattern PHONE_PATTERN = Pattern.compile( "\\\\+?\\\\d{1,4}?[-.\\\\s]?\\\\(?\\\\d{1,3}?\\\\)?[-.\\\\s]?\\\\d{1,4}[-.\\\\s]?\\\\d{1,4}[-.\\\\s]?\\\\d{1,9}" );
+//	public static final Pattern PHONE_PATTERN_RU = Pattern.compile( "^((8|\\\\+7)[\\\\- ]?)?(\\\\(?\\\\d{3}\\\\)?[\\\\- ]?)?[\\\\d\\\\- ]{7,10}$" );
+	public static final Pattern PHONE_PATTERN_RU = Pattern.compile( "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$" );
 	public static final Pattern IP4_PATTERN = Pattern.compile( "(?:\\b|^)((?:(?:(?:\\d)|(?:\\d{2})|(?:1\\d{2})|(?:2[0-4]\\d)|(?:25[0-5]))\\.){3}(?:(?:(?:\\d)|(?:\\d{2})|(?:1\\d{2})|(?:2[0-4]\\d)|(?:25[0-5]))))(?:\\b|$)" );
 	public static final Pattern RF_ZIP_CODE_PATTERN = Pattern.compile( "^(\\d{6})(?:)?$" );
 	public static final Pattern MONEY_PATTERN = Pattern.compile( "[0-9]*(\\.[0-9][0-9])?$" );
@@ -222,14 +227,29 @@ public class Util {
 	 * Returns specified string hash digest using SHA-1 algorithm
 	 * 
 	 * @param s the source string
+	 * 
 	 * @return the hash code as hex string
 	 * 
 	 * @throws Exception
 	 */
 	public static String hashCode( String s ) throws Exception {
 		MessageDigest md = MessageDigest.getInstance( "SHA-1" );
-		md.update( s.getBytes( ) );
-		return( getHex( md.digest( ) ) );
+		return( toHex( md.digest( s.getBytes( ) ) ) );
+	}
+	
+	/**
+	 * Returns specified file hash 
+	 * 
+	 * @param path the file path
+	 * 
+	 * @return the hash code as hex string
+	 * 
+	 * @throws Exception
+	 */
+	public static String hashCode( Path path ) throws Exception {
+		MessageDigest md = MessageDigest.getInstance( "SHA-1" );
+		byte[] data = Files.readAllBytes( path );
+		return( toHex( md.digest( data ) ) );
 	}
 	
 	/**
@@ -255,25 +275,54 @@ public class Util {
 	}
 	
 	/**
-	 * Converts hex string to the string
+	 * Converts hex string to the string using decode charset {@see java.nio.charset.StandardCharsets#UTF_8}
 	 * 
 	 * @param sHex the source hex string
 	 * 
 	 * @return the result string
 	 */
 	public static String fromHex( String sHex ) {
+        return( fromHex( sHex, StandardCharsets.UTF_8 ) );
+	}
+	
+	/**
+	 * Converts hex string to the string
+	 * 
+	 * @param sHex the source hex string
+	 * @param charset the charset to decode bytes
+	 * 
+	 * @return the result string
+	 */
+	public static String fromHex( String sHex, Charset charset ) {
         String s = "";
         try {
             byte[] ab = Hex.decodeHex( sHex );
-            s = new String( ab, StandardCharsets.UTF_8 );
+            s = new String( ab, charset );
         } catch( DecoderException e ) {
             throw new IllegalArgumentException( "Invalid Hex format." );
         }
         return( s );
 	}
-	
+
 	/**
-	 * Returns true if this machine OS is windows and false if linux
+	 * Converts hex string to the byte array
+	 * 
+	 * @param sHex the source hex string
+	 * 
+	 * @return the byte array
+	 */
+	public static byte[] fromHexString( String sHex ) {
+		byte[] ab;
+        try {
+            ab = Hex.decodeHex( sHex );
+        } catch( DecoderException e ) {
+            throw new IllegalArgumentException( "Invalid Hex format." );
+        }
+        return( ab );
+	}
+
+	/**
+	 * Returns true if this machine OS is windows and false if nix
 	 * 
 	 * @return true or false
 	 */
@@ -385,5 +434,17 @@ public class Util {
 			sb.append( as[ random.nextInt( as.length ) ] );
 		}
 		return( sb.toString( ) );
+	}
+	
+	/**
+	 * Returns resource path
+	 * 
+	 * @param type the class
+	 * @param sName the resource name
+	 * 
+	 * @return the resource path
+	 */
+	public static String getResourcePath( Class< ? > type, String sName ) {
+		return( type.getResource( sName ).getPath( ) );
 	}
 }
