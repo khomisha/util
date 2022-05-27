@@ -33,8 +33,12 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.DecoderException;
@@ -446,5 +450,136 @@ public class Util {
 	 */
 	public static String getResourcePath( Class< ? > type, String sName ) {
 		return( type.getResource( sName ).getPath( ) );
+	}
+
+	/**
+	 * Assembles an array elements to string using a delimiter string.
+	 * 
+	 * @param asSrc
+	 *            the array to assemble.
+	 * @param sDelim
+	 *            the delimiter.
+	 * 
+	 * @return s string which assembles array elements or empty string if array
+	 *         is empty or null
+	 */
+	public static String assemble( String[] asSrc, String sDelim ) {
+		List< String > list = Arrays.asList( asSrc );
+		return( assemble( list, sDelim ) );
+	}
+
+	/**
+	 * Assembles an list elements to string using a delimiter string.
+	 * 
+	 * @param list
+	 *            the list to assemble.
+	 * @param sDelim
+	 *            the delimiter.
+	 * 
+	 * @return s the string which assembles list elements or empty string if list
+	 *         is empty or null
+	 */
+	public static String assemble( List< String > list, String sDelim ) {
+		if( list == null || list.size( ) == 0 ) {
+			return( "" );
+		}
+		StringBuffer s = new StringBuffer( );
+		int iItem;
+		for( iItem = 0; iItem < list.size( ) - 1; iItem++ ) {
+			s.append( list.get( iItem ) );
+			s.append( sDelim );
+		}
+		s.append( list.get( iItem ) );
+		return( s.toString( ) );
+	}
+
+	/**
+	 * Returns resource bundle for given locale.
+	 * 
+	 * @param sBundle
+	 *            the base name of the resource bundle, a fully qualified class
+	 *            name
+	 * @param locale
+	 *            the locale object
+	 * 
+	 * @return resource bundle
+	 */
+	public static ResourceBundle getBundle( String sBundle, Locale locale ) {
+		return( 
+			ResourceBundle.getBundle( 
+				sBundle, 
+				locale,
+                ResourceBundle.Control.getControl( ResourceBundle.Control.FORMAT_PROPERTIES )
+            )
+        );
+	}
+
+	/**
+	 * Converts LSB integer to the MSB integer. Usage:
+	 * <pre>
+	 * public static void main(String argv[]) {
+	 *     before 0x01020304
+	 *     after  0x04030201
+	 *     int v = 0x01020304;
+	 *     System.out.println("before : 0x" + Integer.toString(v,16));
+	 *     System.out.println("after  : 0x" + Integer.toString(swabInt(v),16));
+	 * }
+	 * </pre>
+	 * 
+	 * @param i
+	 *            integer to convert
+	 * 
+	 * @return integer in MSB first.
+	 */
+	public final static int swabInt( int i ) {
+		return ( i >>> 24 ) | ( i << 24 ) | ( ( i << 8 ) & 0x00FF0000 ) | ( ( i >> 8 ) & 0x0000FF00 );
+	}
+
+	/**
+	 * Fixes ordinary and double quotes in input string
+	 * 
+	 * @param s
+	 *            the input string
+	 * 
+	 * @return result string.
+	 */
+	public static String fixQuotes( String s ) {
+		if( s == null || s.equals( "" ) ) {
+			return( s );
+		}
+		s = s.replaceAll( "'", "~'" );
+		return( s.replaceAll( "\"", "~\"" ) );
+	}
+
+	/**
+	 * Converts integer to the byte array (little endian).
+	 * 
+	 * @param iValue
+	 *            the integer to convert
+	 * 
+	 * @return byte array.
+	 */
+	public static final byte[] intToByteArray( int iValue ) {
+	    return new byte[] {
+	        ( byte )( iValue >>> 24 ),
+	        ( byte )( iValue >>> 16 ),
+	        ( byte )( iValue >>> 8 ),
+	        ( byte )iValue
+	    };
+	}
+
+	/**
+	 * Converts byte array (little endian) to integer.
+	 * 
+	 * @param ab
+	 *            the byte array to convert
+	 * 
+	 * @return integer.
+	 */
+	public static final int byteArrayToInt( byte[] ab ) {
+	    return( ab[ 0 ] << 24 )
+            + ( ( ab[ 1 ] & 0xFF ) << 16 )
+            + ( ( ab[ 2 ] & 0xFF ) << 8 )
+            + ( ab[ 3 ] & 0xFF );
 	}
 }
